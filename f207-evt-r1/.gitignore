@@ -1,0 +1,4 @@
+# Build output (per-project build/ dirs are also covered by app/*/.gitignore)
+build/
+**/build/
+_objs/

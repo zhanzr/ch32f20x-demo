@@ -1,0 +1,24 @@
+# CMake/Ninja build output
+build/
+build-gcc/
+build-gcc-lto/
+build-ac6/
+_objs/
+
+# Firmware artifacts
+*.elf
+*.hex
+*.bin
+*.map
+
+# Editor / OS
+.vscode/
+.idea/
+*.user
+*.uvguix.*
+*.uvoptx
+*.uvprojx.bak
+
+# Tool-generated
+compile_commands.json
+CMakeCache.txt
