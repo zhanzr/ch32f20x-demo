@@ -26,14 +26,10 @@ CH32F20x SPL sources, include paths and the `CH32F20x_D8C` /
 `../drivers/` — see `../drivers/README.md` for their provenance and the two
 toolchain-only local patches (system clock select + core_cm3.c STREX fix).
 
-## Clock tree (144 MHz)
+## Clock
 
-```
-HSE 8 MHz → PLL (x18) → SYSCLK 144 MHz
-  AHB  /1 → HCLK 144 MHz
-  APB1 /2 → PCLK1  72 MHz   (USART1 is on APB2 → 144 MHz)
-  APB2 /1 → PCLK2 144 MHz
-```
+144 MHz from the 8 MHz HSE via PLL ×18: HCLK = 144 MHz, PCLK1 = 72 MHz
+(APB1 /2), PCLK2 = 144 MHz (APB2 /1, USART1 is on APB2).
 
 `SystemInit()` (from `drivers/CH32F20x/Source/system_ch32f20x.c`, called by
 the startup file before `main`) programs the PLL; `SystemClock_Config()` in

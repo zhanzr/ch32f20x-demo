@@ -12,14 +12,6 @@ All of clock init (144 MHz PLL from the 8 MHz HSE), UART console, SysTick
 delays and the newlib stubs come from the shared board layer (`board/` +
 `cmake/` at the f207-evt-r1 root).
 
-## Layout
-
-```
-src/main.c      LED (PA0) init + main loop (toggle LED1, print state)
-CMakeLists.txt  wires the app to the shared board layer
-build.sh        CMake + Ninja + GNU arm-none-eabi-gcc wrapper
-```
-
 ## Build & flash
 
 ```bash

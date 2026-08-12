@@ -36,13 +36,3 @@ ninja flash            # WCH OpenOCD + WCH-Link (CMSIS-DAP) over SWD
 
 Then open the project's USART1 console (115200 8-N-1). On f207-evt-r1 the
 console is `COM18` (WCH-Link SERIAL).
-
-## Repository layout
-
-```
-.
-├── README.md             ← this file (overall content)
-└── f207-evt-r1/          ← f207-evt-r1 board: app/, board/, cmake/, drivers/, scripts/
-    ├── README.md         ← board hardware + project list
-    └── board/README.md   ← shared board layer docs
-```
