@@ -33,17 +33,48 @@ void Board_Init(void)
 }
 
 /* ------------------------------------------------------------------------ */
-/* SysTick-based polling delays (SysTick clock = HCLK/8, as in the WCH EVT
- * debug.c Delay_Init/Delay_Ms/Delay_Us). */
+/* 1 ms SysTick tick (SysTick clock source = HCLK/8, as in the WCH EVT
+ * debug.c). HAL_GetTick()/HAL_Delay() mirror the STM32 HAL API so benchmark
+ * ports are the same shape as in the sibling stm32f1 repo. */
 
-static uint8_t  p_us = 0;
-static uint16_t p_ms = 0;
+static volatile uint32_t uwTick = 0;
+
+void SysTick_Handler(void)
+{
+    uwTick++;
+}
+
+void TICK_Init(void)
+{
+    SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);
+    SysTick->LOAD = (uint32_t)(SystemCoreClock / 8000U) - 1U;   /* 1 ms @ HCLK/8 */
+    SysTick->VAL  = 0;
+    SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
+}
+
+uint32_t HAL_GetTick(void)
+{
+    return uwTick;
+}
+
+void HAL_Delay(uint32_t ms)
+{
+    uint32_t start = uwTick;
+    while ((uint32_t)(uwTick - start) < ms)
+    {
+    }
+}
+
+/* ------------------------------------------------------------------------ */
+/* Microsecond delay (SysTick polling; the tick counter is not used while
+ * this runs). */
+
+static uint8_t p_us = 0;
 
 void Delay_Init(void)
 {
-    SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);
     p_us = (uint8_t)(SystemCoreClock / 8000000U);
-    p_ms = (uint16_t)((uint32_t)p_us * 1000U);
+    TICK_Init();
 }
 
 void Delay_Us(uint32_t n)
@@ -65,19 +96,7 @@ void Delay_Us(uint32_t n)
 
 void Delay_Ms(uint16_t n)
 {
-    uint32_t i;
-
-    SysTick->LOAD = (uint32_t)n * p_ms;
-    SysTick->VAL  = 0x00;
-    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
-
-    do
-    {
-        i = SysTick->CTRL;
-    } while ((i & 0x01) && !(i & (1U << 16)));
-
-    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
-    SysTick->VAL = 0x00;
+    HAL_Delay(n);
 }
 
 /* ------------------------------------------------------------------------ */

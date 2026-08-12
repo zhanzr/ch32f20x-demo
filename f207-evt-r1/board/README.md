@@ -13,7 +13,7 @@ ch32f207_apply_board(${PROJECT_NAME}.elf "-O2")
 
 | File                      | Purpose                                                        |
 | ------------------------- | -------------------------------------------------------------- |
-| `board.c` / `board.h`     | `Board_Init()`, `SystemClock_Config()`, SysTick polling delays, `Error_Handler()` |
+| `board.c` / `board.h`     | `Board_Init()`, `SystemClock_Config()`, 1 ms SysTick tick (`HAL_GetTick`/`HAL_Delay`), `Delay_Us`, `Error_Handler()` |
 | `uart_printf.c` / `.h`    | USART1 console init + blocking `UART_PutChar` / `UART_GetChar` |
 | `syscalls.c`              | newlib retarget: `_write` → USART1, `_sbrk`, `_fstat`, ...      |
 | `startup_ch32f20x_D8C.S`  | CMSIS GCC startup for CH32F205/207 (D8C) vector table, GNU as syntax |

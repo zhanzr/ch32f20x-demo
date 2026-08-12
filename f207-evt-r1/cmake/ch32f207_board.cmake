@@ -56,6 +56,7 @@ function(ch32f207_apply_board TGT OPT)
         ${BOARD_DIR}/startup_ch32f20x_D8C.S
         ${CH32F207_SYSTEM_SOURCE}
         ${CH32_CMSIS}/core_cm3.c
+        ${CH32_SPL}/src/ch32f20x_adc.c
         ${CH32_SPL}/src/ch32f20x_gpio.c
         ${CH32_SPL}/src/ch32f20x_rcc.c
         ${CH32_SPL}/src/ch32f20x_usart.c

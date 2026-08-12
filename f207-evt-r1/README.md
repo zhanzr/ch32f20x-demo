@@ -33,9 +33,16 @@ USART1 on PA9/PA10 at 115200 8-N-1, wired to the WCH-Link SERIAL port.
 
 ## Projects
 
-| Project       | What it is                               |
-| ------------- | ---------------------------------------- |
-| `blink_hello` | LED1 (PA0, external wire) blink + USART1 console print |
+| Project        | What it is                                                       |
+| -------------- | ---------------------------------------------------------------- |
+| `blink_hello`  | LED1 (PA0, external wire) blink + ADC internal channels (temp/VREFINT) |
+| `dhry_144m`    | Dhrystone 2.1 @ 144 MHz                                          |
+| `coremark_144m`| CoreMark 1.0 @ 144 MHz                                           |
+
+## Docs
+
+* `docs/ch32f20x-flash-layout.md` — the 480 KB physical Flash / `R0WAIT`
+  zero-wait vs. extended non-zero-wait regions of the CH32F207VCT6 die.
 
 ## Build & flash
 
