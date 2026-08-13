@@ -3,8 +3,8 @@
   * @brief   USART1 printf transport for the f207-evt-r1 board.
   *
   * USART1 is on PA9 (TX) / PA10 (RX) and is wired to the WCH-Link SERIAL
-  * (VCP) port of the on-board WCH-Link (COM18 on this PC). Output is
-  * 115200 8-N-1, blocking (polled) so nothing is dropped.
+  * (VCP) port of the on-board WCH-Link (COMxx). Output is 115200 8-N-1,
+  * blocking (polled) so nothing is dropped.
   */
 
 #include "uart_printf.h"

@@ -38,7 +38,7 @@ board.c only refreshes `SystemCoreClock`.
 ## Console
 
 USART1 on **PA9 (TX) / PA10 (RX)**, 115200 8-N-1, wired to the on-board
-WCH-Link SERIAL (`COM18` on this PC). `printf()` output reaches it through
+WCH-Link SERIAL (`COMxx`). `printf()` output reaches it through
 `syscalls.c:_write()` → `UART_PutChar()` → `USART_SendData` (blocking).
 
 ## Adding a new app

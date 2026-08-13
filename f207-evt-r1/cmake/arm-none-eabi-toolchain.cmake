@@ -7,8 +7,8 @@
 #   cmake -G Ninja -DARM_GCC_ROOT=/path/to/arm-none-eabi ..   # override
 #
 # ARM_GCC_ROOT: directory that contains the toolchain's "bin" subfolder.
-# - Windows: defaults to the Arm GNU toolchain used for this repo.
-# - Linux/macOS: defaults to PATH lookup (arm-none-eabi-gcc must be installed).
+# Set it via the ARM_GCC_ROOT environment variable or -DARM_GCC_ROOT=...;
+# otherwise the arm-none-eabi tools must be on PATH.
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
@@ -17,13 +17,10 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 # executable link step is needed during the initial compiler sanity test.
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-if(CMAKE_HOST_WIN32)
-    set(ARM_GCC_ROOT "D:/Arm/GNU Toolchain mingw-w64-x86_64-arm-none-eabi" CACHE PATH
-        "Root dir of the arm-none-eabi toolchain (contains bin/)")
-else()
-    set(ARM_GCC_ROOT "" CACHE PATH
-        "Root dir of the arm-none-eabi toolchain (contains bin/)")
-endif()
+# Resolve the toolchain root from the ARM_GCC_ROOT environment variable when
+# set; otherwise fall back to a PATH lookup of arm-none-eabi-gcc.
+set(ARM_GCC_ROOT "$ENV{ARM_GCC_ROOT}" CACHE PATH
+    "Root dir of the arm-none-eabi toolchain (contains bin/)")
 
 if(ARM_GCC_ROOT)
     set(_TOOLBIN "${ARM_GCC_ROOT}/bin")

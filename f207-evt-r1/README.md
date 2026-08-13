@@ -7,11 +7,13 @@
 * MCU: **CH32F207VCT6** (LQFP100, 256 KB flash, 64 KB SRAM, 144 MHz max,
   Cortex-M3).
 * HSE: 8 MHz external crystal.
+* Ethernet: the CH32F207 has a **built-in 10BASE-T PHY** — the board's RJ45
+  connects straight to the chip (no external PHY). `eth_http` uses it.
 * LEDs: on-board LED1/LED2 are **not connected to the MCU** on this PCB —
   wired externally as needed. This repo's `blink_hello` uses **LED1 on PA0**
   (low active) through an external wire.
 * USART1 console: **PA9 (TX) / PA10 (RX)**, 115200 8-N-1 → the on-board
-  WCH-Link SERIAL port (`COM18` on this PC).
+  WCH-Link SERIAL port (`COMxx`).
 * Debug/flash probe: the on-board **WCH-Link** runs **CMSIS-DAP firmware**
   (VID:PID `1a86:8012`, SWD), so it is driven by the WCH OpenOCD build that
   ships the `wch_arm` flash driver — no Keil MDK required.
@@ -38,6 +40,7 @@ USART1 on PA9/PA10 at 115200 8-N-1, wired to the WCH-Link SERIAL port.
 | `blink_hello`  | LED1 (PA0, external wire) blink + ADC internal channels (temp/VREFINT) |
 | `dhry_144m`    | Dhrystone 2.1 @ 144 MHz                                          |
 | `coremark_144m`| CoreMark 1.0 @ 144 MHz                                           |
+| `eth_http`     | lwIP HTTP server over the built-in 10BASE-T PHY (DHCP, web + JSON API) |
 
 ## Docs
 

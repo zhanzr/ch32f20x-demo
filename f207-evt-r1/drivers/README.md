@@ -5,7 +5,7 @@ pack / WCH EVT so no Keil MDK runtime is ever needed to build these projects:
 
 | Source | Path in this repo |
 | ------ | ----------------- |
-| Keil `WCH32F2xx_DFP` 1.0.3 (`D:\Arm\Packs\Keil\WCH32F2xx_DFP\1.0.3`) `Device/Include` | `CH32F20x/Include/` (`ch32f20x.h`, `system_ch32f20x.h`) |
+| Keil `WCH32F2xx_DFP` 1.0.3 `Device/Include` | `CH32F20x/Include/` (`ch32f20x.h`, `system_ch32f20x.h`) |
 | Keil `WCH32F2xx_DFP` 1.0.3 `Device/Source` | `CH32F20x/Source/` (`system_ch32f20x.c`) |
 | Keil `WCH32F2xx_DFP` 1.0.3 `Device/StdPeriph_Driver/{inc,src}` | `CH32F20x/StdPeriphDriver/{inc,src}/` |
 | WCH EVT `EXAM/SRC/CMSIS` (`core_cm3.h`, `core_cm3.c`) | `CMSIS/` |

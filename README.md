@@ -18,8 +18,8 @@ See `f207-evt-r1/README.md` for the board's hardware details and its project lis
   GNU Toolchain 15.3.1).
 * Build: CMake + Ninja (each project has a `build.sh` wrapper).
 * Drivers: the WCH **CH32F20x StdPeriphDriver** + CMSIS vendored from the
-  Keil `WCH32F2xx_DFP` 1.0.3 pack (`D:\Arm\Packs\Keil\WCH32F2xx_DFP`) into
-  `<board>/drivers/` — the Keil MDK runtime is **not** used.
+  Keil `WCH32F2xx_DFP` 1.0.3 pack into `<board>/drivers/` — the Keil MDK
+  runtime is **not** used.
 * Flashing: **WCH OpenOCD** (the build bundled with MounRiver Studio, which
   ships the `wch_arm` flash driver) driving the on-board **WCH-Link** in
   CMSIS-DAP mode over SWD.
@@ -35,4 +35,4 @@ ninja flash            # WCH OpenOCD + WCH-Link (CMSIS-DAP) over SWD
 ```
 
 Then open the project's USART1 console (115200 8-N-1). On f207-evt-r1 the
-console is `COM18` (WCH-Link SERIAL).
+console is `COMxx` (WCH-Link SERIAL).

@@ -15,9 +15,9 @@ set(BIN_HEX "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex")
 
 # ---------------------------------------------------------------------------
 # Locate the WCH OpenOCD (with the wch_arm flash driver). The copy bundled
-# with MounRiver Studio is the default.
+# with MounRiver Studio is the default; point WCH_OPENOCD_HOME at its "bin"
+# directory (or pass -DWCH_OPENOCD=/path/to/openocd) if it is not on PATH.
 set(_WCH_OPENOCD_HINTS
-    "D:/MounRiver/MounRiver_Studio2/resources/app/resources/win32/components/WCH/OpenOCD/OpenOCD/bin"
     "$ENV{WCH_OPENOCD_HOME}/bin"
 )
 find_program(WCH_OPENOCD NAMES openocd openocd.exe HINTS ${_WCH_OPENOCD_HINTS}
