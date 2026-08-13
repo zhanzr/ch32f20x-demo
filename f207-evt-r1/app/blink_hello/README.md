@@ -1,10 +1,10 @@
-# blink_hello â€?CH32F207VCT6 (f207-evt-r1) template
+# blink_hello ï¿½?CH32F207VCT6 (f207-evt-r1) template
 
 Template for the f207-evt-r1 board: blinks **LED1 on PA0** (low active, wired
-with an external wire) and samples the **ADC1 internal channels** â€?the die
-temperature sensor (IN16) and VREFINT (IN17) â€?converting them to temperature
+with an external wire) and samples the **ADC1 internal channels** ï¿½?the die
+temperature sensor (IN16) and VREFINT (IN17) ï¿½?converting them to temperature
 and VDDA, printed once per 500 ms toggle over the **USART1 console**
-(PA9/PA10 â†?WCH-Link SERIAL, `COMxx` @ 115200 8-N-1).
+(PA9/PA10 ï¿½?WCH-Link SERIAL, `COMxx` @ 115200 8-N-1).
 
 > The on-board LEDs of the f207-evt-r1 are **not** connected to the MCU on the
 > PCB; for this demo LED1 is wired to **PA0 with an external wire** (LOW
@@ -19,19 +19,34 @@ tick and the newlib stubs come from the shared board layer (`board/` +
 The CH32F20x ADC has **16 external + 2 internal** signal sources. Both
 internal channels are gated by the **TSVREFE** bit in `ADC_CTLR2`:
 
-* **Temperature sensor â€?ADC1_IN16.** Output voltage rises linearly with die
+* **Temperature sensor ï¿½?ADC1_IN16.** Output voltage rises linearly with die
   temperature. Datasheet (CH32F207DS0 Â§4.3.22): `V25 = 1.40 V` typ @ 25 Â°C,
-  `Avg_Slope = 4.3 mV/Â°C` typ, recommended sample time **17.1 Âµs** (239.5
-  cycles @ 14 MHz). Conversion:
-  `T (Â°C) = ((VSENSE âˆ?V25) / Avg_Slope) + 25`.
-* **VREFINT â€?ADC1_IN17.** Internal 1.20 V reference, used to back-calculate
+  `Avg_Slope = 4.3 mV/Â°C` typ (min/max 3.8/4.8), recommended sample time
+  **17.1 Âµs** (239.5 cycles @ 14 MHz).
+* **VREFINT ï¿½?ADC1_IN17.** Internal 1.20 V reference, used to back-calculate
   `VDDA` (`VDDA = VREFINT_typ Ã— 4096 / raw`).
 
 The sample is taken with `ADC_SampleTime_239Cycles5` and averaged 10Ã—, then
 offset-corrected with the ADC calibration value (`Get_CalibrationValue`).
 
+### Factory calibration (do not use the typical V25)
+
+The datasheet's **typical** `V25 = 1.40 V` has a wide per-chip scatter
+(1.34â€“1.46 V), which alone would put the reading off by up to ~14 Â°C. Each
+chip is therefore factory-calibrated: the info ROM word at **`0x1FFFF720`**
+holds the temperature-sensor voltage in mV (`bits[15:0]`) at a factory
+reference temperature in Â°C (`bits[31:16]`) - the same word the SPL helper
+`TempSensor_Volt_To_Temper()` reads. The conversion becomes:
+
+```
+T (Â°C) = Refer_Temper - (VSENSE_mV - Refer_Volt) / 4.3
+```
+
+with `VSENSE_mV = raw Ã— VDDA / 4096` using the measured (VREFINT-derived)
+`VDDA`. On this board `Refer_Volt = 1394 mV @ 29 Â°C`.
+
 > Note on the ADC clock: at the 144 MHz system clock, PCLK2 = 144 MHz and the
-> only prescaler options are /2 /4 /6 /8, so `RCC_PCLK2_Div8` gives 18 MHz â€?> above the datasheet 14 MHz max. This is a CH32F20x register limitation;
+> only prescaler options are /2 /4 /6 /8, so `RCC_PCLK2_Div8` gives 18 MHz ï¿½?> above the datasheet 14 MHz max. This is a CH32F20x register limitation;
 > WCH's own EVT examples run 12 MHz at 96 MHz. The demo still reads a
 > sensible temperature (verified on hardware).
 
@@ -48,10 +63,11 @@ ninja bin                  # optional raw .bin image
 ```
 === blink_hello on CH32F207VCT6 @ 144000000 Hz ===
 ADC internal channels: temperature (IN16) + VREFINT (IN17)
-Calibration value: 5
-[1] LED1 ON  | T= 21.2 C  VDDA=3.257 V  (IN16 raw 1740, VREFINT raw 1509)
-[2] LED1 OFF | T= 21.0 C  VDDA=3.257 V  (IN16 raw 1739, VREFINT raw 1509)
+Calibration value: 6
+Temp sensor cal: Refer_Volt=1394 mV @ Refer_Temper=29 C
+[1] LED1 ON  | T= 31.4 C  VDDA=3.301 V  (IN16 raw 1717, VREFINT raw 1489)
+[2] LED1 OFF | T= 31.4 C  VDDA=3.301 V  (IN16 raw 1717, VREFINT raw 1489)
 ...
 ```
 
-`144000000 Hz` is the HSE 8 MHz â†?PLL Ã—18 system clock (`SystemCoreClock`).
+`144000000 Hz` is the HSE 8 MHz ï¿½?PLL Ã—18 system clock (`SystemCoreClock`).

@@ -36,7 +36,10 @@ and two internal ADC channels:
 
 The ADC measurement is the same as `blink_hello`: the two internal channels
 gated by `TSVREFE` (die temperature IN16 + VREFINT IN17), with VDDA
-back-calculated from the internal 1.20 V reference.
+back-calculated from the internal 1.20 V reference and the die temperature
+from the per-chip **factory calibration** stored at info-ROM `0x1FFFF720`
+(`Refer_Volt` / `Refer_Temper`, slope 4.3 mV/°C) - not the datasheet's wide-
+scatter typical V25.
 
 ## Ethernet notes
 

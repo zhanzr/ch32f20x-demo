@@ -15,13 +15,30 @@
 #define ADC_CH_VREFINT ADC_Channel_Vrefint       /* ADC1_IN17: internal 1.20 V ref */
 
 /* CH32F207 datasheet (CH32F207DS0, 4.3.22 Temperature sensor characteristics):
- *   V25        = 1.40 V typ @ 25 C   (1.34 .. 1.46 V)
+ *   V25        = 1.40 V typ @ 25 C   (1.34 .. 1.46 V)  <- per-chip scatter!
  *   Avg_Slope  = 4.3 mV/C typ        (3.8 .. 4.8 mV/C)
  *   TS_temp    = 17.1 us sample time @ fADC = 14 MHz  (239.5 cycles)
- * Internal reference: VREFINT = 1.20 V typ. */
-#define TEMP_V25_MV      1400.0f
-#define TEMP_AVG_SLOPE   4.3f
-#define VREFINT_TYP_V    1.20f
+ * Internal reference: VREFINT = 1.20 V typ.
+ *
+ * The *typical* V25 alone would put the reading off by up to ~14 C, so the
+ * per-chip factory calibration stored in the info ROM is used instead (the
+ * same word the SPL helper TempSensor_Volt_To_Temper() reads):
+ *   0x1FFFF720: bits[15:0]  = Refer_Volt   (temp-sensor voltage in mV)
+ *               bits[31:16] = Refer_Temper (factory reference temperature in C)
+ *   T(C) = Refer_Temper - (VSENSE_mV - Refer_Volt) / 4.3 */
+#define TEMP_CAL_ADDR     0x1FFFF720u
+#define TEMP_AVG_SLOPE    4.3f
+#define VREFINT_TYP_V     1.20f
+
+static uint16_t s_ReferVolt;      /* mV @ factory reference temperature */
+static uint16_t s_ReferTemper;    /* degC */
+
+static void TEMP_Calibration_Read(void)
+{
+    uint32_t cal = *(volatile uint32_t *)TEMP_CAL_ADDR;
+    s_ReferVolt   = (uint16_t)(cal & 0xFFFFu);
+    s_ReferTemper = (uint16_t)((cal >> 16) & 0xFFFFu);
+}
 
 static int16_t  s_CalibrationValue = 0;
 static volatile uint32_t s_AdcRunning = 0;
@@ -148,11 +165,14 @@ int main(void)
     Board_Init();          /* SystemCoreClock update + USART1 console + 1 ms tick */
     LED_Init();
     ADC1_Init();
+    TEMP_Calibration_Read();
 
     printf("\r\n=== blink_hello on CH32F207VCT6 @ %lu Hz ===\r\n",
            (unsigned long)SystemCoreClock);
     printf("ADC internal channels: temperature (IN16) + VREFINT (IN17)\r\n");
     printf("Calibration value: %d\r\n", (int)s_CalibrationValue);
+    printf("Temp sensor cal: Refer_Volt=%u mV @ Refer_Temper=%u C\r\n",
+           (unsigned)s_ReferVolt, (unsigned)s_ReferTemper);
 
     while (1)
     {
@@ -164,10 +184,12 @@ int main(void)
         float vdda_v = (r_vrefint != 0) ? (VREFINT_TYP_V * 4096.0f) / (float)r_vrefint
                                         : 0.0f;
 
-        /* Temperature-sensor voltage in mV, then the datasheet formula:
-         *   T (C) = ((VSENSE - V25) / Avg_Slope) + 25. */
+        /* Temperature-sensor voltage in mV (VSENSE scales with VDDA), then the
+         * factory-calibrated formula (same as SPL TempSensor_Volt_To_Temper):
+         *   T (C) = Refer_Temper - (VSENSE_mV - Refer_Volt) / 4.3. */
         float v_sense_mv = (float)r_temp * (vdda_v * 1000.0f) / 4096.0f;
-        float temp_c     = (v_sense_mv - TEMP_V25_MV) / TEMP_AVG_SLOPE + 25.0f;
+        float temp_c     = (float)s_ReferTemper
+                           - ((float)v_sense_mv - (float)s_ReferVolt) / TEMP_AVG_SLOPE;
 
         LED_Toggle();
         printf("[%lu] LED1 %s | T=%5.1f C  VDDA=%.3f V  (IN16 raw %ld, VREFINT raw %ld)\r\n",

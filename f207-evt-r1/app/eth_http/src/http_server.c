@@ -74,13 +74,23 @@ static void led_set(int i, int on)
 /* --------------------------------------------------------------------------
  * Internal ADC channels: die temperature (IN16) + VREFINT (IN17) -> VDDA.
  * Same measurement as blink_hello.
+ *
+ * The datasheet's typical V25 (1.40 V @ 25 C) has a wide per-chip scatter
+ * (1.34..1.46 V), so the factory calibration in the info ROM is used instead
+ * (the same word the SPL helper TempSensor_Volt_To_Temper() reads):
+ *   0x1FFFF720: bits[15:0]  = Refer_Volt   (temp-sensor voltage in mV)
+ *               bits[31:16] = Refer_Temper (factory reference temperature in C)
+ *   T(C) = Refer_Temper - (VSENSE_mV - Refer_Volt) / 4.3
  * ------------------------------------------------------------------------ */
 #define ADC_CH_TEMP    ADC_Channel_TempSensor
 #define ADC_CH_VREFINT ADC_Channel_Vrefint
 
-#define TEMP_V25_MV      1400.0f
+#define TEMP_CAL_ADDR    0x1FFFF720u
 #define TEMP_AVG_SLOPE   4.3f
 #define VREFINT_TYP_V    1.20f
+
+static uint16_t s_ReferVolt;      /* mV @ factory reference temperature */
+static uint16_t s_ReferTemper;    /* degC */
 
 static int16_t s_CalibrationValue = 0;
 static uint8_t adc_ready = 0;
@@ -140,8 +150,15 @@ static void adc_measure(float *vdda_mv, float *temp_c)
 
   if (!adc_ready)
   {
+    uint32_t cal;
+
     adc_init();
     adc_ready = 1;
+
+    /* Read the factory temperature-sensor calibration from the info ROM. */
+    cal = *(volatile uint32_t *)TEMP_CAL_ADDR;
+    s_ReferVolt   = (uint16_t)(cal & 0xFFFFu);
+    s_ReferTemper = (uint16_t)((cal >> 16) & 0xFFFFu);
   }
 
   r_temp    = adc_calibrated(adc_read_channel(ADC_CH_TEMP));
@@ -149,8 +166,9 @@ static void adc_measure(float *vdda_mv, float *temp_c)
 
   *vdda_mv = (r_vrefint != 0) ? (VREFINT_TYP_V * 4096.0f) / (float)r_vrefint * 1000.0f
                               : 0.0f;
-  *temp_c  = (((float)r_temp * (*vdda_mv / 4096.0f) - TEMP_V25_MV)
-              / TEMP_AVG_SLOPE + 25.0f);
+  *temp_c  = (float)s_ReferTemper
+             - (((float)r_temp * (*vdda_mv / 4096.0f) - (float)s_ReferVolt)
+                / TEMP_AVG_SLOPE);
 }
 
 /* --------------------------------------------------------------------------
